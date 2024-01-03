@@ -2,7 +2,7 @@ import * as React from 'react';
 import {entityToPath, getStorage} from "../Utils"
 import {searchIndicator} from "../QueryHelpers"
 import {
-    Alert, Button,
+    Alert, Box, Button,
     Chip,
     CircularProgress,
     Divider,
@@ -20,6 +20,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import useDomEvaluator from "../hooks/useDOMEvaluator";
 import {GetPageContent, MessageTypes} from "../chromeServices/types";
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 
 function HomeView(props: any) {
 
@@ -88,7 +89,9 @@ function HomeView(props: any) {
             observable['status']['code'] = "not_found";
         } else {
             let indic_score = result['data']['indicators']['edges'][0]['node']['x_opencti_score'];
+            let indic_id = result['data']['indicators']['edges'][0]['node']['id'];
             observable['status']['value'] = indic_score + "/100";
+            observable['link'] = storage['opencti_url'] + entityToPath('indicator') + '/' + indic_id;
             if (indic_score === 0) {
                 observable['status']['code'] = "benign";
             } else if (indic_score > 0 && indic_score < 60) {
@@ -200,6 +203,12 @@ function HomeView(props: any) {
                         </Stack>
                         <Divider textAlign="left">KNOWLEDGE</Divider>
                         {renderObservableAssociationTable(observable)}
+                        <Divider textAlign="left"></Divider>
+                        <Box sx={{ pt: 2 , textAlign: 'right'}}>
+                            <Button target="_blank" href={observable.link} sx={{color: "rgb(216, 27, 96)"}} size="small" startIcon={<OpenInNewRoundedIcon />}>
+                                View in OpenCTI
+                            </Button>
+                        </Box>
                     </AccordionDetails>
                 </Accordion>
             )
@@ -227,7 +236,6 @@ function HomeView(props: any) {
             </div>
         )
     }
-
 }
 
 export default HomeView;
