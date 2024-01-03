@@ -1,5 +1,5 @@
 {
-  "name": "OpenCTI React Extension",
+  "name": "OpenCTI Threat Crawler",
   "description": "Search observables and vulnerabilities in Web content and give context",
   "version": "1.0",
   "manifest_version": 3,
