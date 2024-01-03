@@ -1,0 +1,105 @@
+.status-badge {
+  border-radius: 0;
+  font-weight: 800;
+  width: 90px;
+  text-align: center;
+}
+
+.malicious {
+  background-color: rgba(244, 67, 54, 0.08)!important;
+  color: rgb(244, 67, 54) !important;
+}
+
+.suspicious {
+  background-color: rgb(255, 135, 7, 0.08) !important;
+  color: rgb(255, 135, 7) !important;
+}
+
+.benign {
+  background-color: rgb(76, 175, 80, 0.08)!important;
+  color: rgb(76, 175, 80) !important;
+}
+
+.bg-report {
+  width: 100px !important;
+  height: 20px !important;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(156, 39, 176, 0.08) !important;
+  color: rgb(156, 39, 176) !important;
+  border: 1px solid rgb(156, 39, 176) !important;
+}
+
+.bg-malware {
+  width: 100px !important;
+  height: 20px !important;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(255, 152, 0, 0.08) !important;
+  color: rgb(255, 152, 0) !important;
+  border: 1px solid rgb(255, 152, 0) !important;
+}
+
+.bg-vulnerability {
+  width: 100px !important;
+  height: 20px !important;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(121, 85, 72, 0.08) !important;
+  color: rgb(121, 85, 72) !important;
+  border: 1px solid rgb(121, 85, 72) !important;
+}
+
+.bg-intrusion-set {
+  width: 100px !important;
+  height: 20px !important;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(255, 87, 34, 0.08) !important;
+  color: rgb(255, 87, 34) !important;
+  border: 1px solid rgb(255, 87, 34) !important;
+}
+
+.bg-threat-actor-individual {
+  width: 100px !important;
+  height: 20px !important;
+  line-height: 1;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(123, 31, 162, 0.08) !important;
+  color: rgb(123, 31, 162) !important;
+  border: 1px solid rgb(123, 31, 162) !important;
+}
+
+.bg-threat-actor-group {
+  width: 100px !important;
+  height: 20px !important;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(233, 30, 99, 0.08) !important;
+  color: rgb(233, 30, 99) !important;
+  border: 1px solid rgb(233, 30, 99) !important;
+}
+
+.bg-campaign {
+  width: 100px !important;
+  height: 20px !important;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(171, 71, 188, 0.08) !important;
+  color: rgb(171, 71, 188) !important;
+  border: 1px solid rgb(171, 71, 188) !important;
+}
+
+.bg-tool {
+  width: 100px !important;
+  height: 20px !important;
+  font-weight: 700;
+  font-size: 0.75em !important;
+  background-color: rgba(76, 175, 80, 0.08) !important;
+  color: rgb(76, 175, 80) !important;
+  border: 1px solid rgb(76, 175, 80) !important;
+}
+

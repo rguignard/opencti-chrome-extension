@@ -1,1 +1,1 @@
-# opencti-chrome-extension
+# OpenCTI Chrome Extension
