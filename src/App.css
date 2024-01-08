@@ -20,6 +20,21 @@
   color: rgb(76, 175, 80) !important;
 }
 
+.malicious {
+  background-color: rgba(244, 67, 54, 0.08)!important;
+  color: rgb(244, 67, 54) !important;
+}
+
+.suspicious {
+  background-color: rgb(255, 135, 7, 0.08) !important;
+  color: rgb(255, 135, 7) !important;
+}
+
+.found {
+  background-color: rgb(25, 135, 84, 0.08)!important;
+  color: rgb(25, 135, 84) !important;
+}
+
 .bg-report {
   width: 100px !important;
   height: 20px !important;

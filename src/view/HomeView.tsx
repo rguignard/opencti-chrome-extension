@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {entityToPath, getStorage} from "../Utils"
-import {searchIndicator} from "../QueryHelpers"
+import {searchIndicator, searchVulnerability} from "../QueryHelpers"
 import {
     Alert, Box, Button,
     Chip,
@@ -18,11 +18,11 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import useDomEvaluator from "../hooks/useDOMEvaluator";
+import useDomEvaluator from '../hooks/useDOMEvaluator';
 import {GetPageContent, MessageTypes} from "../chromeServices/types";
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 
-function HomeView(props: any) {
+function HomeView() {
 
     const [observables, setObservables] = React.useState<any[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -67,65 +67,96 @@ function HomeView(props: any) {
     }, []);
 
     function updateObservableState(item: any) {
-        const nextCounters = observables.map((c) => {
-            if (c['value'] === item['value']) {
-                // Increment the clicked counter
+        const nextCounters = observables.map((counter) => {
+            if (counter['value'] === item['value']) {
                 return item
             } else {
-                // The rest haven't changed
-                return c;
+                return counter;
             }
         });
         setObservables(observables => [...observables, ...nextCounters]);
     }
 
-    async function searchObservable(observable: any, storage: any) {
-        let result = await searchIndicator(observable, storage);
-        observable['state'] = 'processed';
-        observable['status'] = {};
-
-        if (result['data']['indicators']['edges'].length === 0) {
-            observable['status']['value'] = "Not Found";
-            observable['status']['code'] = "not_found";
-        } else {
-            let indic_score = result['data']['indicators']['edges'][0]['node']['x_opencti_score'];
-            let indic_id = result['data']['indicators']['edges'][0]['node']['id'];
-            observable['status']['value'] = indic_score + "/100";
-            observable['link'] = storage['opencti_url'] + entityToPath('indicator') + '/' + indic_id;
-            if (indic_score === 0) {
-                observable['status']['code'] = "benign";
-            } else if (indic_score > 0 && indic_score < 60) {
-                observable['status']['code'] = "suspicious";
-            } else {
-                observable['status']['code'] = "malicious";
-            }
-            observable['labels'] = [];
-            let nodeLabels = result['data']['indicators']['edges'][0]['node']['objectLabel']['edges'];
-            for (const label of nodeLabels) {
-                observable['labels'].push(label['node']['value']);
-            }
-            observable['associations'] = [];
-            let nodeReports = result['data']['indicators']['edges'][0]['node']['reports']['edges'];
-            for (const report of nodeReports) {
-                let reportId = report['node']['id'];
+    function processSTIXRelations(observable: any, nodeSTIXRelations: any, storage: any) {
+        for (const relation of nodeSTIXRelations) {
+            if (relation['node']['to'].hasOwnProperty('entity_type')) {
+                let relationId = relation['node']['to']['id'];
                 observable['associations'].push({
-                    entity_type: 'report',
-                    id: reportId,
-                    name: report['node']['name'],
-                    link: storage['opencti_url']+entityToPath('report') + '/' + reportId
+                    entity_type: relation['node']['to']['entity_type'],
+                    id: relationId,
+                    name: relation['node']['to']['name'],
+                    link: storage['opencti_url']+entityToPath(relation['node']['to']['entity_type']) + '/' + relationId
                 });
             }
-            let nodeSTIXRelations = result['data']['indicators']['edges'][0]['node']['stixCoreRelationships']['edges'];
-            for (const relation of nodeSTIXRelations) {
-                if (relation['node']['to'].hasOwnProperty('entity_type')) {
-                    let relationId = relation['node']['to']['id'];
-                    observable['associations'].push({
-                        entity_type: relation['node']['to']['entity_type'],
-                        id: relationId,
-                        name: relation['node']['to']['name'],
-                        link: storage['opencti_url']+entityToPath(relation['node']['to']['entity_type']) + '/' + relationId
-                    });
+        }
+        return observable;
+    }
+
+    function processReportsRelations(observable: any, nodeReports: any, storage: any) {
+        for (const report of nodeReports) {
+            let reportId = report['node']['id'];
+            observable['associations'].push({
+                entity_type: 'report',
+                id: reportId,
+                name: report['node']['name'],
+                link: storage['opencti_url']+entityToPath('report') + '/' + reportId
+            });
+        }
+        return observable;
+    }
+
+    async function searchObservable(observable: any, storage: any) {
+        if (observable["type"] === "cve") {
+            let result = await searchVulnerability(observable, storage);
+            observable["state"] = "processed";
+            observable["status"] = {};
+            if (result["data"]["vulnerabilities"]["edges"].length === 0) {
+                observable["status"] = { value: "Not Found", code: "not_found"};
+            } else {
+                observable['status'] = { value: 'Found', code: 'found'};
+                let vulnerability_id = result['data']['vulnerabilities']['edges'][0]['node']['id'];
+                observable['link'] = storage['opencti_url'] + entityToPath('vulnerability') + '/' + vulnerability_id;
+                observable['labels'] = [];
+                let nodeLabels = result['data']['vulnerabilities']['edges'][0]['node']['objectLabel']['edges'];
+                for (const label of nodeLabels) {
+                    observable['labels'].push(label['node']['value']);
                 }
+                observable['associations'] = [];
+                let nodeReports = result['data']['vulnerabilities']['edges'][0]['node']['reports']['edges'];
+                observable = processReportsRelations(observable, nodeReports, storage);
+                let nodeSTIXRelations = result['data']['vulnerabilities']['edges'][0]['node']['stixCoreRelationships']['edges'];
+                observable = processSTIXRelations(observable, nodeSTIXRelations, storage);
+            }
+        }
+        else {
+            let result = await searchIndicator(observable, storage);
+            observable['state'] = "processed";
+            observable['status'] = {};
+
+            if (result['data']['indicators']['edges'].length === 0) {
+                observable['status'] = { value: "Not Found", code: "not_found"};
+            } else {
+                let indic_score = result['data']['indicators']['edges'][0]['node']['x_opencti_score'];
+                let indic_id = result['data']['indicators']['edges'][0]['node']['id'];
+                observable['status']['value'] = indic_score + "/100";
+                observable['link'] = storage['opencti_url'] + entityToPath('indicator') + '/' + indic_id;
+                if (indic_score === 0) {
+                    observable['status']['code'] = "benign";
+                } else if (indic_score > 0 && indic_score < 60) {
+                    observable['status']['code'] = "suspicious";
+                } else {
+                    observable['status']['code'] = "malicious";
+                }
+                observable['labels'] = [];
+                let nodeLabels = result['data']['indicators']['edges'][0]['node']['objectLabel']['edges'];
+                for (const label of nodeLabels) {
+                    observable['labels'].push(label['node']['value']);
+                }
+                observable['associations'] = [];
+                let nodeReports = result['data']['indicators']['edges'][0]['node']['reports']['edges'];
+                observable = processReportsRelations(observable, nodeReports, storage);
+                let nodeSTIXRelations = result['data']['indicators']['edges'][0]['node']['stixCoreRelationships']['edges'];
+                observable = processSTIXRelations(observable, nodeSTIXRelations, storage);
             }
         }
         updateObservableState(observable);
@@ -133,26 +164,33 @@ function HomeView(props: any) {
 
     function renderObservableAssociationTable(observable: any) {
         const relations = observable.associations;
-        return (
-            <TableContainer>
-                <Table>
-                    <TableBody>
-                        {relations.map((row: any) => (
-                            <TableRow
-                                key={row.id}
-                                sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                            >
-                                <TableCell sx={{width: "10%"}} component="th" scope="row">
-                                    <Chip sx={{borderRadius: 0}} label={row?.entity_type?.toUpperCase()}
-                                          className={`bg-${row?.entity_type?.toLowerCase()}`}/>
-                                </TableCell>
-                                <TableCell><a href={row.link} target="_blank"> {row.name}</a></TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        )
+        if (relations.length > 0) {
+            return (
+                <TableContainer>
+                    <Table>
+                        <TableBody>
+                            {relations.map((row: any) => (
+                                <TableRow
+                                    key={row.id}
+                                    sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                                >
+                                    <TableCell sx={{width: "10%"}} component="th" scope="row">
+                                        <Chip sx={{borderRadius: 0}} label={row?.entity_type?.toUpperCase()}
+                                              className={`bg-${row?.entity_type?.toLowerCase()}`}/>
+                                    </TableCell>
+                                    <TableCell><a href={row.link} target="_blank"> {row.name}</a></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )
+        }
+        else {
+            return (
+                <Typography sx={{p: 1}} variant="body2">No relations found</Typography>
+            )
+        }
     }
 
     function renderAccordion(observable: any) {
