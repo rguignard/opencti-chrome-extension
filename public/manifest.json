@@ -1,8 +1,8 @@
 {
   "name": "OpenCTI Threat Crawler",
   "description": "Search observables and vulnerabilities in Web content and give context",
-  "version": "1.0.2",
-  "manifest_version": 3,
+  "version": "1.0.3",
+  "manifest_version": 4,
   "action": {
     "default_popup": "index.html",
     "default_title": "Open the popup"
