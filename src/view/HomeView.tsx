@@ -231,7 +231,7 @@ function HomeView() {
                         </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Stack direction="row" spacing={1} sx={{pb: 2}}>
+                        <Stack direction="row" useFlexGap flexWrap="wrap" spacing={1} sx={{pb: 2}}>
                             {observable.labels && observable.labels.map((value: string) => {
                                 return (
                                     <Chip sx={{bgColor: "#6c757d"}} size="small" label={value} color="primary"
