@@ -148,9 +148,9 @@ function HomeView() {
                     observable['status']['code'] = "malicious";
                 }
                 observable['labels'] = [];
-                let nodeLabels = result['data']['indicators']['edges'][0]['node']['objectLabel']['edges'];
+                let nodeLabels = result['data']['indicators']['edges'][0]['node']['objectLabel'];
                 for (const label of nodeLabels) {
-                    observable['labels'].push(label['node']['value']);
+                    observable['labels'].push(label['value']);
                 }
                 observable['associations'] = [];
                 let nodeReports = result['data']['indicators']['edges'][0]['node']['reports']['edges'];
@@ -231,7 +231,7 @@ function HomeView() {
                         </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Stack direction="row" spacing={1} sx={{pb: 2}}>
+                        <Stack direction="row" useFlexGap flexWrap="wrap" spacing={1} sx={{pb: 2}}>
                             {observable.labels && observable.labels.map((value: string) => {
                                 return (
                                     <Chip sx={{bgColor: "#6c757d"}} size="small" label={value} color="primary"
