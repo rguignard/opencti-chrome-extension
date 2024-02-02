@@ -21,13 +21,9 @@ export const searchIndicator = async (observable: any, storage: any) => {
               x_opencti_score
               indicator_types
               objectLabel {
-                edges {
-                  node {
                     id
                     value
                     color
-                  }
-                }
               } 
               stixCoreRelationships{
                 edges{
@@ -144,13 +140,9 @@ export const searchVulnerability = async (observable: any, storage: any) => {
               name
               id
               objectLabel {
-                edges {
-                  node {
                     id
                     value
                     color
-                  }
-                }
               } 
               stixCoreRelationships{
                 edges{
