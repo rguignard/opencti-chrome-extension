@@ -117,7 +117,7 @@ function HomeView() {
                 let vulnerability_id = result['data']['vulnerabilities']['edges'][0]['node']['id'];
                 observable['link'] = storage['opencti_url'] + entityToPath('vulnerability') + '/' + vulnerability_id;
                 observable['labels'] = [];
-                let nodeLabels = result['data']['vulnerabilities']['edges'][0]['node']['objectLabel']['edges'];
+                let nodeLabels = result['data']['vulnerabilities']['edges'][0]['node']['objectLabel'];
                 for (const label of nodeLabels) {
                     observable['labels'].push(label['node']['value']);
                 }
