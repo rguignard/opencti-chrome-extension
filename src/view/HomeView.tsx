@@ -21,8 +21,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import useDomEvaluator from '../hooks/useDOMEvaluator';
 import {GetPageContent, MessageTypes} from "../chromeServices/types";
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 
 function HomeView() {
 
@@ -277,6 +277,9 @@ function HomeView() {
             <div>
                 {observables && (
                     <Box sx={{ pb: 2}}>
+                        <Button variant="outlined" size="small" onClick={handleCopyToClipboard} startIcon={<ContentCopyOutlinedIcon />}>
+                            Copy to clipboard
+                        </Button>
                         <Button variant="outlined" size="small" onClick={handleCopyToClipboard} startIcon={<ContentCopyIcon />}>
                             Copy to clipboard
                         </Button>
