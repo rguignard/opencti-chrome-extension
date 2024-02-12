@@ -5,7 +5,7 @@ import {
     Alert, Box, Button,
     Chip,
     CircularProgress,
-    Divider,
+    Divider, Snackbar,
     Stack,
     Table,
     TableBody,
@@ -21,6 +21,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import useDomEvaluator from '../hooks/useDOMEvaluator';
 import {GetPageContent, MessageTypes} from "../chromeServices/types";
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 function HomeView() {
 
@@ -29,6 +31,7 @@ function HomeView() {
     const [config, setConfig] = React.useState<any>();
     const [notConfigured, setNotConfigured] = React.useState(false);
     const [noObservablesFound, setNoObservablesFound] = React.useState(false);
+    const [copy, setCopy] = React.useState(false);
 
     const {evaluate: getPageContent} = useDomEvaluator<GetPageContent>(
         MessageTypes.GET_CONTENT,
@@ -75,6 +78,14 @@ function HomeView() {
             }
         });
         setObservables(observables => [...observables, ...nextCounters]);
+    }
+
+    const handleCopyToClipboard = () => {
+        setCopy(true);
+        let textObservables = observables.map((item) => {
+            return item.value;
+        }).join('\n');
+        navigator.clipboard.writeText(textObservables);
     }
 
     function processSTIXRelations(observable: any, nodeSTIXRelations: any, storage: any) {
@@ -264,6 +275,24 @@ function HomeView() {
     else {
         return (
             <div>
+                {observables && (
+                    <Box sx={{ pb: 2}}>
+                        <Button variant="outlined" size="small" onClick={handleCopyToClipboard} startIcon={<ContentCopyIcon />}>
+                            Copy to clipboard
+                        </Button>
+                        <Snackbar
+                            open={copy}
+                            onClose={() => setCopy(false)}
+                            autoHideDuration={2000}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "right"
+                            }}
+                            message="Copied to clipboard"
+                        />
+                    </Box>
+                )}
+
                 {observables && observables.map((observable) => {
                     return (
                         <div>
