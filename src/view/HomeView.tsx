@@ -2,6 +2,7 @@ import * as React from 'react';
 import {entityToPath, getStorage} from "../Utils"
 import {searchIndicator, searchVulnerability} from "../QueryHelpers"
 import {
+    AccordionActions,
     Alert, Box, Button,
     Chip,
     CircularProgress,
@@ -23,8 +24,10 @@ import {GetPageContent, MessageTypes} from "../chromeServices/types";
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithChangesOutlined';
+import {View} from "../App";
 
-function HomeView() {
+function HomeView(props: any) {
 
     const [observables, setObservables] = React.useState<any[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -41,20 +44,23 @@ function HomeView() {
     React.useEffect(() => {
 
         const fetchData = async () => new Promise<any[]>(async (resolve, reject) => {
-            const items = await getPageContent();
-            if (items) {
-                resolve(items);
+            const content = await getPageContent();
+            if (content) {
+                resolve(content);
             }
         });
 
         getStorage().then((storage: any) => {
             if (storage.hasOwnProperty("opencti_url") && storage.hasOwnProperty("opencti_token")){
                 setConfig(storage);
-                fetchData().then((items: any[]) => {
+                fetchData().then((content: any) => {
+                    let items = content['items'];
                     if (items && items.length > 0){
                         setObservables(items);
+                        props.setObservables(items);
+                        props.setContent(content);
                         setLoading(false);
-                        items.forEach((item) => searchObservable(item, storage));
+                        items.forEach((item: any) => searchObservable(item, storage));
                     }else {
                         setNoObservablesFound(true);
                     }
@@ -88,6 +94,10 @@ function HomeView() {
         navigator.clipboard.writeText(textObservables);
     }
 
+    const handleCreateWorkbench = () => {
+        props.setView(View.WorkbenchPublish);
+    }
+
     function processSTIXRelations(observable: any, nodeSTIXRelations: any, storage: any) {
         for (const relation of nodeSTIXRelations) {
             if (relation['node']['to'].hasOwnProperty('entity_type')) {
@@ -117,7 +127,7 @@ function HomeView() {
     }
 
     async function searchObservable(observable: any, storage: any) {
-        if (observable["type"] === "cve") {
+        if (observable["type"] === "vulnerability") {
             let result = await searchVulnerability(observable, storage);
             observable["state"] = "processed";
             observable["status"] = {};
@@ -232,7 +242,7 @@ function HomeView() {
             )
         } else {
             return (
-                <Accordion square={true} sx={{border: "1px solid #f2f6fa", boxShadow: 0}}>
+                <Accordion defaultExpanded square={true} sx={{border: "1px solid #f2f6fa", boxShadow: 0}}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon/>}>
                         <Stack direction="row" sx={{display: 'flex', width: '100%'}} spacing={2}>
@@ -245,20 +255,19 @@ function HomeView() {
                         <Stack direction="row" useFlexGap flexWrap="wrap" spacing={1} sx={{pb: 2}}>
                             {observable.labels && observable.labels.map((value: string) => {
                                 return (
-                                    <Chip sx={{bgColor: "#6c757d"}} size="small" label={value} color="primary"
-                                          variant="outlined"/>
+                                    <Chip sx={{bgColor: "#6c757d"}} size="small" label={value} color="primary" variant="outlined"/>
                                 )
                             })}
                         </Stack>
                         <Divider textAlign="left">KNOWLEDGE</Divider>
                         {renderObservableAssociationTable(observable)}
                         <Divider textAlign="left"></Divider>
-                        <Box sx={{ pt: 2 , textAlign: 'right'}}>
-                            <Button target="_blank" href={observable.link} sx={{color: "rgb(216, 27, 96)"}} size="small" startIcon={<OpenInNewRoundedIcon />}>
-                                View in OpenCTI
-                            </Button>
-                        </Box>
                     </AccordionDetails>
+                    <AccordionActions>
+                        <Button target="_blank" href={observable.link} sx={{color: "rgb(216, 27, 96)"}} size="small" startIcon={<OpenInNewRoundedIcon />}>
+                            View in OpenCTI
+                        </Button>
+                    </AccordionActions>
                 </Accordion>
             )
         }
@@ -277,22 +286,24 @@ function HomeView() {
             <div>
                 {observables && (
                     <Box sx={{ pb: 2}}>
-                        <Button variant="outlined" size="small" onClick={handleCopyToClipboard} startIcon={<ContentCopyOutlinedIcon />}>
-                            Copy to clipboard
-                        </Button>
-                        <Button variant="outlined" size="small" onClick={handleCopyToClipboard} startIcon={<ContentCopyIcon />}>
-                            Copy to clipboard
-                        </Button>
-                        <Snackbar
-                            open={copy}
-                            onClose={() => setCopy(false)}
-                            autoHideDuration={2000}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "right"
-                            }}
-                            message="Copied to clipboard"
-                        />
+                        <Stack direction="row" sx={{display: 'flex', width: '100%', textAlign: 'right'}} spacing={2}>
+                            <Button variant="outlined" size="small" onClick={handleCopyToClipboard} startIcon={<ContentCopyOutlinedIcon />}>
+                                Copy to clipboard
+                            </Button>
+                            <Button variant="outlined" size="small" onClick={handleCreateWorkbench} startIcon={<PublishedWithChangesOutlinedIcon />}>
+                                Publish in workbench
+                            </Button>
+                            <Snackbar
+                                open={copy}
+                                onClose={() => setCopy(false)}
+                                autoHideDuration={2000}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "right"
+                                }}
+                                message="Copied to clipboard"
+                            />
+                        </Stack>
                     </Box>
                 )}
 

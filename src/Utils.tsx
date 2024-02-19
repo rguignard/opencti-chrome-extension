@@ -1495,7 +1495,7 @@ export function getAllRegexMatches(text: string){
         sha256Matches.forEach(element => matches.push({'value': element.toLowerCase(), 'type': 'sha256', 'id': hashCode(element)}));
     }
     if (cveMatches) {
-        cveMatches.forEach(element => matches.push({'value': element, 'type': 'cve', 'id': hashCode(element)}));
+        cveMatches.forEach(element => matches.push({'value': element, 'type': 'vulnerability', 'id': hashCode(element)}));
     }
 
     if (domainMatches) {
@@ -1540,6 +1540,3 @@ export function getStorage() {
     });
 }
 
-export const getObjectFromLocalStorage = async function() {
-    return (await chrome.storage.local.get(["opencti_url", "opencti_token"]));
-};

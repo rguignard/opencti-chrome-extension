@@ -22,13 +22,15 @@ const useDomEvaluator = <T extends ActionType>(type: MessageTypes) => {
                             { type, payload },
                             async (response: ResponseType | T["response"]) => {
                                 let items: any[] = [];
+                                let content = {'title': tabs[0].title, 'url': tabs[0].url, 'items': items};
                                 let matches = getAllRegexMatches(response);
                                 for (const match of matches) {
                                     match['state'] = 'pending';
                                     items.push(match);
                                 }
-                                setResult(items);
-                                resolve(items);
+                                content['items'] = items;
+                                setResult(content);
+                                resolve(content);
                             },
                         );
                     },
