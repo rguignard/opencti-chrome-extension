@@ -22,7 +22,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import useDomEvaluator from '../hooks/useDOMEvaluator';
 import {GetPageContent, MessageTypes} from "../chromeServices/types";
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithChangesOutlined';
 import {View} from "../App";
@@ -138,9 +137,9 @@ function HomeView(props: any) {
                 let vulnerability_id = result['data']['vulnerabilities']['edges'][0]['node']['id'];
                 observable['link'] = storage['opencti_url'] + entityToPath('vulnerability') + '/' + vulnerability_id;
                 observable['labels'] = [];
-                let nodeLabels = result['data']['vulnerabilities']['edges'][0]['node']['objectLabel'];
-                for (const label of nodeLabels) {
-                    observable['labels'].push(label['node']['value']);
+                let labels = result['data']['vulnerabilities']['edges'][0]['node']['objectLabel'];
+                for (const label of labels) {
+                    observable['labels'].push(label['value']);
                 }
                 observable['associations'] = [];
                 let nodeReports = result['data']['vulnerabilities']['edges'][0]['node']['reports']['edges'];
@@ -169,8 +168,8 @@ function HomeView(props: any) {
                     observable['status']['code'] = "malicious";
                 }
                 observable['labels'] = [];
-                let nodeLabels = result['data']['indicators']['edges'][0]['node']['objectLabel'];
-                for (const label of nodeLabels) {
+                let labels = result['data']['indicators']['edges'][0]['node']['objectLabel'];
+                for (const label of labels) {
                     observable['labels'].push(label['value']);
                 }
                 observable['associations'] = [];
@@ -199,7 +198,7 @@ function HomeView(props: any) {
                                         <Chip sx={{borderRadius: 0}} label={row?.entity_type?.toUpperCase()}
                                               className={`bg-${row?.entity_type?.toLowerCase()}`}/>
                                     </TableCell>
-                                    <TableCell><a href={row.link} target="_blank"> {row.name}</a></TableCell>
+                                    <TableCell><a href={row.link} rel="noreferrer" target="_blank"> {row.name}</a></TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

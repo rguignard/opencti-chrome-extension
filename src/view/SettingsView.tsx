@@ -3,8 +3,6 @@ import Box from '@mui/material/Box';
 import {Alert, Button, LinearProgress, Stack, TextField} from '@mui/material';
 import {Field, Form, Formik} from 'formik';
 import {healthCheck} from "../QueryHelpers";
-import {useRef} from "react";
-
 
 function SettingsView(props: any) {
 

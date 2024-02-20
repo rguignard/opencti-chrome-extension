@@ -297,7 +297,7 @@ function convertToStixBundle(workbenchData: any) {
             let stixIndicator: any;
             let stixRelation: any;
 
-            if (item.type == 'domain') {
+            if (item.type === 'domain') {
                 stixObservable = {
                     "id": "domain-name--" + itemId,
                     "spec_version": "2.1",
@@ -329,7 +329,7 @@ function convertToStixBundle(workbenchData: any) {
                     "target_ref": stixObservable['id']
                 }
             }
-            if (item.type == 'ipv4') {
+            if (item.type === 'ipv4') {
                 stixObservable = {
                     "id": "ipv4-addr--" + itemId,
                     "spec_version": "2.1",
@@ -361,7 +361,7 @@ function convertToStixBundle(workbenchData: any) {
                     "target_ref": stixObservable['id']
                 }
             }
-            if (item.type == 'md5') {
+            if (item.type === 'md5') {
                 stixObservable = {
                     "id": "file--" + itemId,
                     "spec_version": "2.1",
@@ -393,7 +393,7 @@ function convertToStixBundle(workbenchData: any) {
                     "target_ref": stixObservable['id']
                 }
             }
-            if (item.type == 'sha1') {
+            if (item.type === 'sha1') {
                 stixObservable = {
                     "id": "file--" + itemId,
                     "spec_version": "2.1",
@@ -425,7 +425,7 @@ function convertToStixBundle(workbenchData: any) {
                     "target_ref": stixObservable['id']
                 }
             }
-            if (item.type == 'sha256') {
+            if (item.type === 'sha256') {
                 stixObservable = {
                     "id": "file--" + itemId,
                     "spec_version": "2.1",
@@ -465,7 +465,7 @@ function convertToStixBundle(workbenchData: any) {
             object_refs_id.push(stixIndicator.id)
             object_refs_id.push(stixRelation.id)
         }
-        if (item.type == "vulnerability") {
+        if (item.type === "vulnerability") {
             let stixVulnerability = {
                 "id": "vulnerability--"+itemId,
                 "spec_version": "2.1",
