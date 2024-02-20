@@ -5,6 +5,9 @@ import Toolbar from '@mui/material/Toolbar';
 import Logo from '../assets/logo-text.png';
 import {Button, IconButton} from '@mui/material';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithChangesOutlined';
+
 import {View} from "../App";
 
 function TopAppBar(props: any) {
@@ -14,6 +17,10 @@ function TopAppBar(props: any) {
     };
     const handleHomeClick = (event: React.MouseEvent<HTMLElement>) => {
         props.setView(View.Home);
+    };
+
+    const handleWorkbenchPublishClick = (event: React.MouseEvent<HTMLElement>) => {
+        props.setView(View.WorkbenchPublish);
     };
 
     return (
@@ -36,6 +43,22 @@ function TopAppBar(props: any) {
                     </Button>
                     <Box sx={{flexGrow: 1}}/>
                     <Box sx={{display: 'flex'}}>
+                        <IconButton
+                            size="large"
+                            color="inherit"
+                            aria-label="scan"
+                            onClick={handleHomeClick}
+                        >
+                            <SearchOutlinedIcon/>
+                        </IconButton>
+                        <IconButton
+                            size="large"
+                            color="inherit"
+                            aria-label="publish"
+                            onClick={handleWorkbenchPublishClick}
+                        >
+                            <PublishedWithChangesOutlinedIcon/>
+                        </IconButton>
                         <IconButton
                             size="large"
                             color="inherit"

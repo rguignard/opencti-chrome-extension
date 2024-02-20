@@ -2,10 +2,11 @@ import * as React from 'react';
 import {entityToPath, getStorage} from "../Utils"
 import {searchIndicator, searchVulnerability} from "../QueryHelpers"
 import {
+    AccordionActions,
     Alert, Box, Button,
     Chip,
     CircularProgress,
-    Divider,
+    Divider, Snackbar,
     Stack,
     Table,
     TableBody,
@@ -21,14 +22,18 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import useDomEvaluator from '../hooks/useDOMEvaluator';
 import {GetPageContent, MessageTypes} from "../chromeServices/types";
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithChangesOutlined';
+import {View} from "../App";
 
-function HomeView() {
+function HomeView(props: any) {
 
     const [observables, setObservables] = React.useState<any[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [config, setConfig] = React.useState<any>();
     const [notConfigured, setNotConfigured] = React.useState(false);
     const [noObservablesFound, setNoObservablesFound] = React.useState(false);
+    const [copy, setCopy] = React.useState(false);
 
     const {evaluate: getPageContent} = useDomEvaluator<GetPageContent>(
         MessageTypes.GET_CONTENT,
@@ -38,20 +43,23 @@ function HomeView() {
     React.useEffect(() => {
 
         const fetchData = async () => new Promise<any[]>(async (resolve, reject) => {
-            const items = await getPageContent();
-            if (items) {
-                resolve(items);
+            const content = await getPageContent();
+            if (content) {
+                resolve(content);
             }
         });
 
         getStorage().then((storage: any) => {
             if (storage.hasOwnProperty("opencti_url") && storage.hasOwnProperty("opencti_token")){
                 setConfig(storage);
-                fetchData().then((items: any[]) => {
+                fetchData().then((content: any) => {
+                    let items = content['items'];
                     if (items && items.length > 0){
                         setObservables(items);
+                        props.setObservables(items);
+                        props.setContent(content);
                         setLoading(false);
-                        items.forEach((item) => searchObservable(item, storage));
+                        items.forEach((item: any) => searchObservable(item, storage));
                     }else {
                         setNoObservablesFound(true);
                     }
@@ -75,6 +83,18 @@ function HomeView() {
             }
         });
         setObservables(observables => [...observables, ...nextCounters]);
+    }
+
+    const handleCopyToClipboard = () => {
+        setCopy(true);
+        let textObservables = observables.map((item) => {
+            return item.value;
+        }).join('\n');
+        navigator.clipboard.writeText(textObservables);
+    }
+
+    const handleCreateWorkbench = () => {
+        props.setView(View.WorkbenchPublish);
     }
 
     function processSTIXRelations(observable: any, nodeSTIXRelations: any, storage: any) {
@@ -106,7 +126,7 @@ function HomeView() {
     }
 
     async function searchObservable(observable: any, storage: any) {
-        if (observable["type"] === "cve") {
+        if (observable["type"] === "vulnerability") {
             let result = await searchVulnerability(observable, storage);
             observable["state"] = "processed";
             observable["status"] = {};
@@ -117,9 +137,9 @@ function HomeView() {
                 let vulnerability_id = result['data']['vulnerabilities']['edges'][0]['node']['id'];
                 observable['link'] = storage['opencti_url'] + entityToPath('vulnerability') + '/' + vulnerability_id;
                 observable['labels'] = [];
-                let nodeLabels = result['data']['vulnerabilities']['edges'][0]['node']['objectLabel'];
-                for (const label of nodeLabels) {
-                    observable['labels'].push(label['node']['value']);
+                let labels = result['data']['vulnerabilities']['edges'][0]['node']['objectLabel'];
+                for (const label of labels) {
+                    observable['labels'].push(label['value']);
                 }
                 observable['associations'] = [];
                 let nodeReports = result['data']['vulnerabilities']['edges'][0]['node']['reports']['edges'];
@@ -148,8 +168,8 @@ function HomeView() {
                     observable['status']['code'] = "malicious";
                 }
                 observable['labels'] = [];
-                let nodeLabels = result['data']['indicators']['edges'][0]['node']['objectLabel'];
-                for (const label of nodeLabels) {
+                let labels = result['data']['indicators']['edges'][0]['node']['objectLabel'];
+                for (const label of labels) {
                     observable['labels'].push(label['value']);
                 }
                 observable['associations'] = [];
@@ -178,7 +198,7 @@ function HomeView() {
                                         <Chip sx={{borderRadius: 0}} label={row?.entity_type?.toUpperCase()}
                                               className={`bg-${row?.entity_type?.toLowerCase()}`}/>
                                     </TableCell>
-                                    <TableCell><a href={row.link} target="_blank"> {row.name}</a></TableCell>
+                                    <TableCell><a href={row.link} rel="noreferrer" target="_blank"> {row.name}</a></TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -221,7 +241,7 @@ function HomeView() {
             )
         } else {
             return (
-                <Accordion square={true} sx={{border: "1px solid #f2f6fa", boxShadow: 0}}>
+                <Accordion defaultExpanded square={true} sx={{border: "1px solid #f2f6fa", boxShadow: 0}}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon/>}>
                         <Stack direction="row" sx={{display: 'flex', width: '100%'}} spacing={2}>
@@ -234,20 +254,19 @@ function HomeView() {
                         <Stack direction="row" useFlexGap flexWrap="wrap" spacing={1} sx={{pb: 2}}>
                             {observable.labels && observable.labels.map((value: string) => {
                                 return (
-                                    <Chip sx={{bgColor: "#6c757d"}} size="small" label={value} color="primary"
-                                          variant="outlined"/>
+                                    <Chip sx={{bgColor: "#6c757d"}} size="small" label={value} color="primary" variant="outlined"/>
                                 )
                             })}
                         </Stack>
                         <Divider textAlign="left">KNOWLEDGE</Divider>
                         {renderObservableAssociationTable(observable)}
                         <Divider textAlign="left"></Divider>
-                        <Box sx={{ pt: 2 , textAlign: 'right'}}>
-                            <Button target="_blank" href={observable.link} sx={{color: "rgb(216, 27, 96)"}} size="small" startIcon={<OpenInNewRoundedIcon />}>
-                                View in OpenCTI
-                            </Button>
-                        </Box>
                     </AccordionDetails>
+                    <AccordionActions>
+                        <Button target="_blank" href={observable.link} sx={{color: "rgb(216, 27, 96)"}} size="small" startIcon={<OpenInNewRoundedIcon />}>
+                            View in OpenCTI
+                        </Button>
+                    </AccordionActions>
                 </Accordion>
             )
         }
@@ -264,6 +283,29 @@ function HomeView() {
     else {
         return (
             <div>
+                {observables && (
+                    <Box sx={{ pb: 2}}>
+                        <Stack direction="row" sx={{display: 'flex', width: '100%', textAlign: 'right'}} spacing={2}>
+                            <Button variant="outlined" size="small" onClick={handleCopyToClipboard} startIcon={<ContentCopyOutlinedIcon />}>
+                                Copy to clipboard
+                            </Button>
+                            <Button variant="outlined" size="small" onClick={handleCreateWorkbench} startIcon={<PublishedWithChangesOutlinedIcon />}>
+                                Publish in workbench
+                            </Button>
+                            <Snackbar
+                                open={copy}
+                                onClose={() => setCopy(false)}
+                                autoHideDuration={2000}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "right"
+                                }}
+                                message="Copied to clipboard"
+                            />
+                        </Stack>
+                    </Box>
+                )}
+
                 {observables && observables.map((observable) => {
                     return (
                         <div>
